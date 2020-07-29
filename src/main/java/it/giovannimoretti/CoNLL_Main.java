@@ -23,6 +23,8 @@ public class CoNLL_Main {
         CommandLineParser parser = new PosixParser();
         Options options = new Options();
         options.addOption("h", "help", false, "print this message");
+
+
         options.addOption(OptionBuilder.withLongOpt("mode").withDescription("calculate irr on specific ConLL-U field").withArgName("POS | EDGES | DEPREL").hasArg().create("m"));
 
         CommandLine cline = null;
@@ -47,14 +49,27 @@ public class CoNLL_Main {
                     formatter.printHelp(generalHelpDescr, options);
                     System.exit(1);
                 }
+            }else if(!cline.hasOption("mode")){
+                System.out.println("\nerror: mode parameter is required\n");
+                HelpFormatter formatter = new HelpFormatter();
+                formatter.setWidth(500);
+                formatter.printHelp(generalHelpDescr, options);
+                System.exit(1);
             }
 
 
-             filePaths = cline.getArgList();
-        }catch (Exception e){
+            filePaths = cline.getArgList();
+            if (filePaths.size() < 2){
+                System.out.println("\nerror: Specify at least two files\n");
+                HelpFormatter formatter = new HelpFormatter();
+                formatter.setWidth(500);
+                formatter.printHelp(generalHelpDescr, options);
+                System.exit(1);
+            }
+
+        } catch (Exception e) {
 
         }
-
 
 
         List<CoNLL_U_File> files = new ArrayList<>();
@@ -109,12 +124,12 @@ public class CoNLL_Main {
                     if (lines.size() == lineNumber) {
                         lines.add(new ArrayList<>());
                     }
-                    if (mode == Mode.POS){
+                    if (mode == Mode.POS) {
                         lines.get(lineNumber).add(lineItems[3]);
-                    }else if (mode == Mode.EDGES){
+                    } else if (mode == Mode.EDGES) {
                         lines.get(lineNumber).add(lineItems[0] + "_" + lineItems[6]);
-                    }else if (mode == Mode.DEPREL){
-                        lines.get(lineNumber).add(lineItems[0]+"_"+lineItems[6]+"-"+lineItems[7]);
+                    } else if (mode == Mode.DEPREL) {
+                        lines.get(lineNumber).add(lineItems[0] + "_" + lineItems[6] + "-" + lineItems[7]);
                     }
 
 
@@ -126,12 +141,12 @@ public class CoNLL_Main {
         }
         //System.out.println(lines);
 
-        if (mode == Mode.POS){
-            calculateKappa(lines, false , true);
-        }else if (mode == Mode.EDGES){
-            calculateKappa(lines, false , false);
-        }else if (mode == Mode.DEPREL){
-            calculateKappa(lines, true , true);
+        if (mode == Mode.POS) {
+            calculateKappa(lines, false, true);
+        } else if (mode == Mode.EDGES) {
+            calculateKappa(lines, false, false);
+        } else if (mode == Mode.DEPREL) {
+            calculateKappa(lines, true, true);
         }
 
     }
@@ -184,7 +199,7 @@ public class CoNLL_Main {
                     if (line.contains("Kappa =")) {
                         System.out.println(line.trim());
                     }
-                }else{
+                } else {
                     System.out.println(line.trim());
                 }
             }
