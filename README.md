@@ -17,7 +17,7 @@ mvn package
 ```
 
 #### Usage:
-After the setup procedure you can use the script using this command:
+After the setup procedure it's possible to use the script with:
 
 ``
 java -jar target/CoNLL-U_Fleiss_irr.jar -m POS|EDGES|DEPREL <conllu file rate 1> <conllu file rate 2> ...
