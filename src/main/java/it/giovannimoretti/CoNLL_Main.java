@@ -6,16 +6,15 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 
 import java.io.*;
-import java.util.ArrayList;
-
-import java.util.List;
+import java.util.*;
 
 public class CoNLL_Main {
 
     private enum Mode {
         POS,
         EDGES,
-        DEPREL
+        DEPREL,
+        MORPH
     }
 
     public static void main(String[] args) {
@@ -25,7 +24,7 @@ public class CoNLL_Main {
         options.addOption("h", "help", false, "print this message");
 
 
-        options.addOption(OptionBuilder.withLongOpt("mode").withDescription("calculate irr on specific ConLL-U field").withArgName("POS | EDGES | DEPREL").hasArg().create("m"));
+        options.addOption(OptionBuilder.withLongOpt("mode").withDescription("calculate irr on specific ConLL-U field").withArgName("POS | MORPH | EDGES | DEPREL").hasArg().create("m"));
 
         CommandLine cline = null;
         List<String> filePaths = new ArrayList<>();
@@ -101,6 +100,9 @@ public class CoNLL_Main {
         Integer sentenceNumber = files.get(0).getCoNNL_U_Sentences().size();
         Integer raterIndex = 1;
         List<List<String>> lines = new ArrayList<>();
+
+        SortedSet<String> allFeatures = new TreeSet<>();
+
         for (CoNLL_U_File f : files) {
             if (lines.size() == 0) {
                 lines.add(new ArrayList<>());
@@ -115,6 +117,7 @@ public class CoNLL_Main {
             Integer lineNumber = 1;
             Integer sentNumber = 1;
 
+
             for (String sentence : f.getCoNNL_U_Sentences()) {
                 for (String line : sentence.split("\n")) {
                     String[] lineItems = line.split("\t");
@@ -128,6 +131,17 @@ public class CoNLL_Main {
                         lines.get(lineNumber).add(lineItems[3]);
                     } else if (mode == Mode.EDGES) {
                         lines.get(lineNumber).add(lineItems[0] + "_" + lineItems[6]);
+                    } else if (mode == Mode.MORPH) {
+                        String morph = lineItems[5].trim().length() == 0 ? "_" : lineItems[5].trim();
+                        List<String> features = new ArrayList<>(Arrays.asList(morph.replace("_", "").split("\\|")));
+
+                        for (String ft : features){
+                            if (ft.split("=")[0].length() > 0) {
+                                allFeatures.add(ft.split("=")[0]);
+                            }
+                        }
+
+                        lines.get(lineNumber).add(morph);
                     } else if (mode == Mode.DEPREL) {
                         lines.get(lineNumber).add(lineItems[0] + "_" + lineItems[6] + "-" + lineItems[7]);
                     }
@@ -143,13 +157,48 @@ public class CoNLL_Main {
 
         if (mode == Mode.POS) {
             calculateKappa(lines, false, true);
-        } else if (mode == Mode.EDGES) {
+        } else if (mode == Mode.MORPH) {
+            calculateKappa(lines, false, false);
+            System.out.println("-------------");
+            for (String feature : allFeatures){
+                System.out.print(feature+"\t");
+                List<List<String>> copyOfLines  = makeACopyOfList(lines);
+                calculateKappa(copyOfLines, false, false, feature);
+            }
+
+        }  else if (mode == Mode.EDGES) {
             calculateKappa(lines, false, false);
         } else if (mode == Mode.DEPREL) {
             calculateKappa(lines, true, true);
         }
 
     }
+
+    public static void calculateKappa(List<List<String>> copyOfLines, boolean onArcs, boolean details, String feature) {
+        for (List<String> l : copyOfLines) {
+
+            for (int i = 0; i < l.size(); i++) {
+
+                if (l.get(0).startsWith("rater")) {
+                    continue;
+                }
+                List<String> features = new ArrayList<>(Arrays.asList(l.get(i).replace("_", "").split("\\|")));
+                l.set(i,"_");
+                for (String f : features){
+                    if (f.startsWith(feature+"=")){
+                        l.set(i,f);
+                    }
+                }
+
+            }
+
+        }
+
+
+
+        calculateKappa(copyOfLines,false,false);
+    }
+
 
     public static void calculateKappa(List<List<String>> lines, boolean onArcs, boolean details) {
         try {
@@ -206,6 +255,16 @@ public class CoNLL_Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+    }
+
+    private static List<List<String>> makeACopyOfList (List<List<String>> srcList) {
+        List<List<String>> destList = new ArrayList<>();
+        for (List<String> l : srcList){
+            destList.add(new ArrayList<>(l));
+        }
+
+        return destList;
 
     }
 
