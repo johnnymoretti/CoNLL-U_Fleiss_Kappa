@@ -20,7 +20,7 @@ mvn package
 After the setup procedure it's possible to use the script with:
 
 ``
-java -jar target/CoNLL-U_Fleiss_irr.jar -m POS|EDGES|DEPREL <conllu file rate 1> <conllu file rate 2> ...
+java -jar target/CoNLL-U_Fleiss_irr.jar -m POS|MORPH|EDGES|DEPREL <conllu file rate 1> <conllu file rate 2> ...
 ``
 
 The 'mode' parameter specify the ConLL-U field used in irr evaluation. It's possible to choose among POS,EDGES and DEPREL. 
