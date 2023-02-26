@@ -14,7 +14,8 @@ public class CoNLL_Main {
         POS,
         EDGES,
         DEPREL,
-        MORPH
+        MORPH,
+        LEMMA
     }
 
     public static void main(String[] args) {
@@ -24,7 +25,7 @@ public class CoNLL_Main {
         options.addOption("h", "help", false, "print this message");
 
 
-        options.addOption(OptionBuilder.withLongOpt("mode").withDescription("calculate irr on specific ConLL-U field").withArgName("POS | MORPH | EDGES | DEPREL").hasArg().create("m"));
+        options.addOption(OptionBuilder.withLongOpt("mode").withDescription("calculate irr on specific ConLL-U field").withArgName("LEMMA | POS | MORPH | EDGES | DEPREL").hasArg().create("m"));
 
         CommandLine cline = null;
         List<String> filePaths = new ArrayList<>();
@@ -129,6 +130,8 @@ public class CoNLL_Main {
                     }
                     if (mode == Mode.POS) {
                         lines.get(lineNumber).add(lineItems[3]);
+                    } else if (mode == Mode.LEMMA) {
+                        lines.get(lineNumber).add(lineItems[2]);
                     } else if (mode == Mode.EDGES) {
                         lines.get(lineNumber).add(lineItems[0] + "_" + lineItems[6]);
                     } else if (mode == Mode.MORPH) {
@@ -157,6 +160,8 @@ public class CoNLL_Main {
 
         if (mode == Mode.POS) {
             calculateKappa(lines, false, true);
+        }  else if (mode == Mode.LEMMA) {
+            calculateKappa(lines, false, false);
         } else if (mode == Mode.MORPH) {
             calculateKappa(lines, false, false);
             System.out.println("-------------");
