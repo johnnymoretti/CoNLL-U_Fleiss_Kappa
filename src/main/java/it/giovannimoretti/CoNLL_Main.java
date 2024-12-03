@@ -133,6 +133,7 @@ public class CoNLL_Main {
                     } else if (mode == Mode.LEMMA) {
                         lines.get(lineNumber).add(lineItems[2]);
                     } else if (mode == Mode.EDGES) {
+                        // only edge
                         lines.get(lineNumber).add(lineItems[0] + "_" + lineItems[6]);
                     } else if (mode == Mode.MORPH) {
                         String morph = lineItems[5].trim().length() == 0 ? "_" : lineItems[5].trim();
@@ -146,6 +147,7 @@ public class CoNLL_Main {
 
                         lines.get(lineNumber).add(morph);
                     } else if (mode == Mode.DEPREL) {
+                        // edge and deprel together
                         lines.get(lineNumber).add(lineItems[0] + "_" + lineItems[6] + "-" + lineItems[7]);
                     }
 
